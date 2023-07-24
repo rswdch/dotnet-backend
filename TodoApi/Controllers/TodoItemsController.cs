@@ -9,12 +9,14 @@ using TodoApi.Models;
 
 namespace TodoApi.Controllers
 {
+    // Route specifies the base URL as api/TodoItems
+    // Name of class is [controller]Controller i.e. TodoItemsController
     [Route("api/[controller]")]
     [ApiController]
     public class TodoItemsController : ControllerBase
     {
         private readonly TodoContext _context;
-
+        // Constructor
         public TodoItemsController(TodoContext context)
         {
             _context = context;
@@ -89,10 +91,10 @@ namespace TodoApi.Controllers
           {
               return Problem("Entity set 'TodoContext.TodoItems'  is null.");
           }
-            _context.TodoItems.Add(todoItem);
-            await _context.SaveChangesAsync();
+          _context.TodoItems.Add(todoItem);
+          await _context.SaveChangesAsync();
 
-            return CreatedAtAction("GetTodoItem", new { id = todoItem.Id }, todoItem);
+          return CreatedAtAction(nameof(GetTodoItem), new { id = todoItem.Id }, todoItem);
         }
 
         // DELETE: api/TodoItems/5
