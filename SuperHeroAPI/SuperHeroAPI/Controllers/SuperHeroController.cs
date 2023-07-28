@@ -1,6 +1,7 @@
 ﻿using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using SuperHeroAPI.Models;
+using SuperHeroAPI.Services.SuperHeroService;
 
 namespace SuperHeroAPI.Controllers
 {
@@ -8,6 +9,11 @@ namespace SuperHeroAPI.Controllers
     [ApiController]
     public class SuperHeroController : ControllerBase
     {
+        private ISuperHeroService _superHeroService;
+        public SuperHeroController(ISuperHeroService superHeroService)
+        {
+            _superHeroService = superHeroService;
+        }
         private static List<SuperHero> superHeroes = new List<SuperHero>
             {
                 new SuperHero
@@ -30,13 +36,13 @@ namespace SuperHeroAPI.Controllers
         [HttpGet]
         public async Task<ActionResult<List<SuperHero>>> GetAllHeroes()
         {
-            return Ok(superHeroes);
+            return Ok(_superHeroService.GetAllHeroes());
         }
 
         [HttpGet("{id}")]
         public async Task<ActionResult<SuperHero>> GetHero(int id)
         {
-            var hero = superHeroes.Find(x => x.Id == id);
+            var hero = _superHeroService.GetHero(id);
             if (hero is null) return NotFound($@"No hero found with that id {id}");
             return Ok(hero);
         }
@@ -44,35 +50,31 @@ namespace SuperHeroAPI.Controllers
         [HttpPost]
         public async Task<ActionResult<List<SuperHero>>> AddHero(SuperHero hero)
         {
-            superHeroes.Add(hero);
-            return Ok(superHeroes);
+            var result = _superHeroService.AddHero(hero);
+            return Ok(result);
         }
 
         [HttpPut]
         public async Task<ActionResult<List<SuperHero>>> UpdateHero(int id, SuperHero hero)
         {
-            var heroToUpdate = superHeroes.Find(hero => hero.Id == id);
-            if (heroToUpdate is null)
+            var result = _superHeroService.UpdateHero(id, hero);
+            if (result is null)
             {
                 return BadRequest("Hero not found");
             }
 
-            heroToUpdate.Name = hero.Name;
-            heroToUpdate.FirstName = hero.FirstName;
-            heroToUpdate.LastName = hero.LastName;
-            heroToUpdate.Place = hero.Place;
-            return superHeroes;
+            return result;
         }
 
         [HttpDelete]
         public async Task<ActionResult<List<SuperHero>>> DeleteHero(int id)
         {
-            var heroToUpdate = superHeroes.Find(hero => hero.Id == id);
-            if (heroToUpdate is null)
+            var result = _superHeroService.DeleteHero(id);
+            if (result is null)
             {
                 return BadRequest("Hero not found");
             }
-            superHeroes.Remove(heroToUpdate); return Ok(superHeroes);
+            return Ok(result);
 
         }
 
