@@ -11,8 +11,9 @@ namespace SuperHeroAPI.Data
         }
         protected override void OnConfiguring(DbContextOptionsBuilder optionsBuilder)
         {
-            base.OnConfiguring(optionsBuilder);
-            optionsBuilder.UseSqlServer("Server=.\\SQLExpress;Database=superherodb;Trusted_Connection=true;TrustServerCertificate=true;");
+            optionsBuilder.UseNpgsql("Host=localhost; Database=SuperHeroApi; Username=ryan; Password=password");
+            // base.OnConfiguring(optionsBuilder);
+            // optionsBuilder.UseSqlServer("Server=.\\SQLExpress;Database=superherodb;Trusted_Connection=true;TrustServerCertificate=true;");
         }
         public DbSet<SuperHero> SuperHeroes { get; set; }
     }
