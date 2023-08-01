@@ -24,13 +24,20 @@ namespace dotnet_rpg.Controllers
         [HttpGet("{id}")]
         public ActionResult<Character> Get(int id)
         {
-            // var result = mocks.Find(c => c.Id == id);
-            var result = (
-                from mock in mocks
-                where mock.Id == id
-                select mock)
-                .FirstOrDefault();
+            var result = mocks.Find(c => c.Id == id);
+            // var result = (
+            //     from mock in mocks
+            //     where mock.Id == id
+            //     select mock)
+            //     .FirstOrDefault();
             return Ok(result);
+        }
+
+        [HttpPost]
+        public ActionResult<List<Character>> Post(Character newChar)
+        {
+            mocks.Add(newChar);
+            return Ok(mocks);
         }
     }
 }
