@@ -8,12 +8,6 @@ namespace dotnet_rpg.Services.CharacterService;
 
 public class CharacterService : ICharacterService
 {
-    private static List<Character> mocks = new List<Character>
-    {
-        new Character{ Id=0, Name="Mock List"},
-        new Character{ Id=1, Name="Second Mock"},
-        new Character{ Id=2, Name="Third Mock"},
-    };
     private readonly DataContext _context;
     private readonly IMapper _mapper;
     public CharacterService(IMapper mapper, DataContext context)
@@ -50,13 +44,14 @@ public class CharacterService : ICharacterService
     public async Task<ServiceResponse<GetCharacterDto>> GetCharacterById(int id)
     {
         var serviceResponse = new ServiceResponse<GetCharacterDto>();
+        // LINQ method syntax
         var result = _context.Characters.FirstOrDefault(c => c.Id == id);
-        //var result = mocks.FirstOrDefault(c => c.Id == id);
-        // var result = (
-        //     from mock in mocks
-        //     where mock.Id == id
-        //     select mock)
-        //     .FirstOrDefault();
+        // LINQ query syntax
+        var query = (
+            from c in _context.Characters
+            where c.Id == id
+            select c);
+        var list = await query.FirstOrDefaultAsync();
         if (result is null)
         {
             serviceResponse.Data = null;
@@ -65,7 +60,7 @@ public class CharacterService : ICharacterService
         }
         else
         {
-            serviceResponse.Data = _mapper.Map<GetCharacterDto>(result);
+            serviceResponse.Data = _mapper.Map<GetCharacterDto>(list);
         }
         return serviceResponse;
     }
@@ -74,7 +69,7 @@ public class CharacterService : ICharacterService
     {
         try
         {
-            var charToChange = mocks.FirstOrDefault(c => c.Id == newCharacter.Id);
+            var charToChange = _context.Characters.FirstOrDefault(c => c.Id == newCharacter.Id);
             if (charToChange is null)
             {
                 throw new Exception($"Unable to update: No character found with ID {newCharacter.Id}");
@@ -88,9 +83,12 @@ public class CharacterService : ICharacterService
             charToChange.HitPoints = newCharacter.HitPoints;
             charToChange.Name = newCharacter.Name;
             charToChange.Class = newCharacter.Class;
+            await _context.SaveChangesAsync();
+
+            var changedChar = await GetCharacterById(newCharacter.Id);
             return new ServiceResponse<GetCharacterDto>
             {
-                Data = _mapper.Map<GetCharacterDto>(mocks.FirstOrDefault(c => c.Id == newCharacter.Id)),
+                Data = changedChar.Data,
             };
         }
         catch (Exception e)
@@ -105,13 +103,14 @@ public class CharacterService : ICharacterService
     {
         try
         {
-            var charToDelete = mocks.FirstOrDefault(c => c.Id == id);
+            var charToDelete = await _context.Characters.FirstOrDefaultAsync(c => c.Id == id);
             if (charToDelete is null)
             {
                 throw new Exception($"Unable to update: No character found with ID {id}");
             }
 
-            mocks.Remove(charToDelete);
+            _context.Characters.Remove(charToDelete);
+            await _context.SaveChangesAsync();
             var newList = await GetAllCharacters();
             return new ServiceResponse<List<GetCharacterDto>>
             {
