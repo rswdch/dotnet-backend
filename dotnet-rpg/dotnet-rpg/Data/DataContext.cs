@@ -1,0 +1,16 @@
+﻿using dotnet_rpg.Models;
+using Microsoft.EntityFrameworkCore;
+
+namespace dotnet_rpg.Data
+{
+    public class DataContext : DbContext
+    {
+        public DataContext(DbContextOptions<DataContext> options): base(options)
+        {
+            
+        }
+        // List of tables
+        //public DbSet<Character> Characters { get; set; }
+        public DbSet<Character> Characters => Set<Character>();
+    }
+}
